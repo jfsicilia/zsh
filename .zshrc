@@ -48,8 +48,8 @@ bindkey -v
 # Ctrl+p and Ctrl+n to move through context aware history.
 bindkey '^p' history-search-backward
 bindkey '^n' history-search-forward
-# Ctrl+f for autosuggestion completion
-bindkey '^f' forward-char
+# Ctrl+space for autosuggestion completion
+bindkey '^@' forward-char
 # Some useful emacs keybindings
 bindkey '^a' beginning-of-line
 bindkey '^e' end-of-line
@@ -66,7 +66,7 @@ bindkey '^k' kill-line
 # ctrl+p -- Previous command in history.
 # ctrl+n -- Next command in history.
 # ctrl+s -- History incremental search.
-# ctrl+f -- Complete autosuggestion
+# ctrl+space -- Complete autosuggestion
 # ctrl+t -- Fuzzy file selection 
 # ctrl+i / Tab -- Open fuzzy completion.
 # ctrl+o / ctrl+j / ctrl+m / Enter -- Run command.
