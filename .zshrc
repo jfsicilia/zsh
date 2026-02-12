@@ -105,7 +105,7 @@ setopt hist_find_no_dups
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}' # Ignore case in autocompletion.
 zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}" # Put colors in autocompletion.
 zstyle ':completion:*' menu no # Beter uix for tab completion with fzf.
-zstyle ':fzf-tab:*' fzf-bindings tab:accept ctrl-j:down ctrl-k:up
+zstyle ':fzf-tab:*' fzf-bindings enter:accept ctrl-j:down ctrl-k:up
 zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color $realpath' # Open previews on tab completion.
 zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath' # zoxide preview
 
@@ -122,7 +122,9 @@ eval "$(oh-my-posh init zsh --config ~/.config/ohmyposh/config.toml)"
 # ALIASES ====================================================================
 alias vi=nvim
 alias vim=nvim
-alias cat=bat
+alias nvim-lazy='NVIM_APPNAME="nvim-lazy" nvim'
+alias nvim-astro='NVIM_APPNAME="nvim-astro" nvim'
+# alias cat=bat
 alias ls=lsd
 alias c=clear
 alias open=xdg-open
