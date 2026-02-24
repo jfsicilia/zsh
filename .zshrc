@@ -124,12 +124,12 @@ alias vi=nvim
 alias vim=nvim
 alias nvim-lazy='NVIM_APPNAME="nvim-lazy" nvim'
 alias nvim-astro='NVIM_APPNAME="nvim-astro" nvim'
-# alias cat=bat
 alias ls=lsd
 alias c=clear
 alias open=xdg-open
 alias _="cd ~/_"
 alias today="fd --changed-within=1d -tf '.*' ~"
+# alias tmux='tmux -S ~/.tmux-socket'
 
 # ENV VARIABLES ==============================================================
 # Set default editor
