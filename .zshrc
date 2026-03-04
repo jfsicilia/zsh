@@ -28,6 +28,9 @@ zinit snippet OMZP::sudo
 # zinit snippet OMZP::kubectl
 # zinit snippet OMZP::kubectx
 zinit snippet OMZP::command-not-found
+zinit snippet OMZP::docker
+zinit snippet OMZP::docker-compose
+
 
 # Load completions
 autoload -Uz compinit && compinit
@@ -129,7 +132,7 @@ alias open=xdg-open
 alias _="cd ~/_"
 alias today="fd --changed-within=1d -tf '.*' ~"
 # alias tmux='tmux -S ~/.tmux-socket'
-alias claude="titled 'Claude Code Hello' claude"
+alias claude="titled 'Claude Code' claude"
 unalias ls 2>/dev/null
 
 # ENV VARIABLES ==============================================================
@@ -159,19 +162,16 @@ ls() {
     # 2. If not showing all and a local .hidden file exists
     if [[ "$show_all" -eq 0 ]] && [[ -f ".hidden" ]]; then
         local ignore_args=()
-        # Read the .hidden file from the current directory
-        while IFS= read -r line || [[ -n "$line" ]]; do
-            # Skip empty lines and comments
-            [[ -z "$line" || "$line" =~ ^# ]] && continue
-            # Trim potential whitespace
-            line=$(echo "$line" | xargs)
-            ignore_args+=("--ignore-glob" "$line")
-        done < ".hidden"
+        # Read .hidden file in an efficient way. 
+        for line in ${(f)"$(< .hidden)"}; do
+            [[ -z "${line// }" || "$line" =~ ^# ]] && continue
+            ignore_args+=("--ignore-glob" "${line#"${line%%[![:space:]]*}"}") # Trim left
+        done
         
-        lsd "${ignore_args[@]}" "$@"
+        command lsd "${ignore_args[@]}" "$@"
     else
         # 3. Standard behavior if no .hidden file is found or -a is used
-        lsd "$@"
+        command lsd "$@"
     fi
 }
 
