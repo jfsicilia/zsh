@@ -124,17 +124,56 @@ alias vi=nvim
 alias vim=nvim
 alias nvim-lazy='NVIM_APPNAME="nvim-lazy" nvim'
 alias nvim-astro='NVIM_APPNAME="nvim-astro" nvim'
-alias ls=lsd
 alias c=clear
 alias open=xdg-open
 alias _="cd ~/_"
 alias today="fd --changed-within=1d -tf '.*' ~"
 # alias tmux='tmux -S ~/.tmux-socket'
+alias claude="titled 'Claude Code Hello' claude"
+unalias ls 2>/dev/null
 
 # ENV VARIABLES ==============================================================
 # Set default editor
 export EDITOR=nvim
 export VISUAL=nvim
+
+# FUNCTIONS ==============================================================
+titled() {
+  local title="$1"; shift
+  print -Pn "\e]0;${title}\a"
+  "$@"
+  print -Pn "\e]0;%~\a"
+}
+
+ls() {
+    # 1. Check if the user wants to show all files
+    # The regex now detects 'a' or 'A' even in combined flags like -la or -rtah
+    local show_all=0
+    for arg in "$@"; do
+        if [[ "$arg" =~ ^-[^-]*[aA] || "$arg" == "--all" || "$arg" == "--almost-all" ]]; then
+            show_all=1
+            break
+        fi
+    done
+
+    # 2. If not showing all and a local .hidden file exists
+    if [[ "$show_all" -eq 0 ]] && [[ -f ".hidden" ]]; then
+        local ignore_args=()
+        # Read the .hidden file from the current directory
+        while IFS= read -r line || [[ -n "$line" ]]; do
+            # Skip empty lines and comments
+            [[ -z "$line" || "$line" =~ ^# ]] && continue
+            # Trim potential whitespace
+            line=$(echo "$line" | xargs)
+            ignore_args+=("--ignore-glob" "$line")
+        done < ".hidden"
+        
+        lsd "${ignore_args[@]}" "$@"
+    else
+        # 3. Standard behavior if no .hidden file is found or -a is used
+        lsd "$@"
+    fi
+}
 
 # VI MODE for OH-MY-POSH =====================================================
 redraw-prompt() {
