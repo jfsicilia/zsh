@@ -39,47 +39,134 @@ autoload -Uz compinit && compinit
 # at shell startup, without producing output.
 zinit cdreplay -q
 
+# Load the edit-command-line function
+autoload -Uz edit-command-line
+zle -N edit-command-line
+
 # PATH =======================================================================
-export PATH=$PATH:~/bin:~/.cargo/bin:~/.local/bin
+export GOPATH="$HOME/.go"
+export GO_INSTALLED="/usr/local/go"
+export PATH="$GOPATH/bin:$PATH"
+export PATH="$GO_INSTALLED/bin:$PATH"
+
+export CARGO_HOME="$HOME/.cargo"
+export RUSTUP_HOME="$HOME/.rustup"
+export PATH="$CARGO_HOME/bin:$PATH"
+
+export PATH=$PATH:~/bin:~/.local/bin
 typeset -U PATH # Force no duplicates in path.
 
 # KEYBINDINGS ================================================================
 # Enable emacs mode.
 # bindkey -e
+#
+# Default emacs keybindings in zsh
+##################################
+#
+# Ctrl+A  Move to beginning of line
+# Ctrl+B  Move back one character
+# Ctrl+C  Interrupt (SIGINT)
+# Ctrl+D  Delete character / EOF (closes shell if line is empty)
+# Ctrl+E  Move to end of line
+# Ctrl+F  Move forward one character
+# Ctrl+G  Abort
+# Ctrl+H  Backspace
+# Ctrl+I  Tab (completion)
+# Ctrl+J  Newline (same as Enter)
+# Ctrl+K  Kill from cursor to end of line
+# Ctrl+L  Clear screen
+# Ctrl+M  Enter
+# Ctrl+N  Next history entry
+# Ctrl+O  Accept line and show next history entry
+# Ctrl+P  Previous history entry
+# Ctrl+Q  Resume output (XON)
+# Ctrl+R  Reverse incremental history search
+# Ctrl+S  Suspend output (XOFF) / forward history search
+# Ctrl+T  Transpose characters
+# Ctrl+U  Kill entire line
+# Ctrl+V  Insert next character literally
+# Ctrl+W  Kill previous word
+# Ctrl+X  Prefix for extended combos (Ctrl+X Ctrl+E, etc.)
+# Ctrl+Y  Yank (paste last killed text)
+# Ctrl+Z  Suspend process (SIGTSTP)
+#
+# Ctrl+X Ctrl+B  No default binding
+# Ctrl+X Ctrl+E  Edit command line in $EDITOR
+# Ctrl+X Ctrl+F  No default binding
+# Ctrl+X Ctrl+G  No default binding
+# Ctrl+X Ctrl+H  No default binding
+# Ctrl+X Ctrl+I  No default binding
+# Ctrl+X Ctrl+J  No default binding
+# Ctrl+X Ctrl+K  No default binding
+# Ctrl+X Ctrl+N  Infer next history word
+# Ctrl+X Ctrl+O  No default binding
+# Ctrl+X Ctrl+P  No default binding
+# Ctrl+X Ctrl+R  History incremental search backward (alternate)
+# Ctrl+X Ctrl+S  History incremental search forward (alternate)
+# Ctrl+X Ctrl+U  Undo
+# Ctrl+X Ctrl+V  Show zsh version
+# Ctrl+X Ctrl+X  Exchange point and mark
+#
+# Practically free:
+#   Ctrl+O  Rarely useful in modern terminals
+#   Ctrl+S  Can be freed with: stty -ixon
+#   Ctrl+Q  Can be freed with: stty -ixon
+#   Ctrl+X  Only acts as prefix, does nothing alone
+
+# In vi mode there are additional keymaps: `viins` for insert mode, `vicmd` for
+# normal mode,`visual` for visual mode and `viopp` for oprator pending mode. 
+# Insert mode (viins) is the default one, so `bindkey` and `bindkey -M viins` 
+# are equivalent.
+#
+# To see insert mode keybindings run
+#   $ bindkey
+# Or
+#   $ bindkey -M viins
+#
+# To see normal mode keybindings run
+#   $ bindkey -M vicmd
+#
+# If you want to get info of a keybinding run: 
+#   bindkey '^e'
+# Or
+#   bindkey -M viins "^e"
+# Or
+#   bindkey -M vicmd "^e"
+
 # Enable vim mode.
 bindkey -v
+
 # Ctrl+p and Ctrl+n to move through context aware history.
 bindkey '^p' history-search-backward
 bindkey '^n' history-search-forward
 # Ctrl+space for autosuggestion completion
 bindkey '^@' forward-char
-# Some useful emacs keybindings
-bindkey '^a' beginning-of-line
-bindkey '^e' end-of-line
-bindkey '^u' kill-whole-line
-bindkey '^k' kill-line
+# Ctrl+e edit line in editor.
+bindkey '^e' edit-command-line
+bindkey '^f' fzf-file-widget 
+bindkey '^y' fzf-history-widget 
+bindkey -M vicmd '^e' edit-command-line
+bindkey -M vicmd 'H' beginning-of-line
+bindkey -M vicmd 'L' end-of-line
 
-# NOTE: Here are the current already bounded combos:
-# If you want all the keybindings run:
-#   bindkey
-# If you want to get info of a keybinding run: 
-#   bindkey '^e'
-# To get information about ctrl+e.
-# ctrl+r -- View history
+# With my own key bindings and other added by different plugins this is the
+# current keybindings in vim mode.
+#
+# ctrl+space -- Complete autosuggestion
+# ctrl+y / ctrl+r -- View history
 # ctrl+p -- Previous command in history.
 # ctrl+n -- Next command in history.
 # ctrl+s -- History incremental search.
-# ctrl+space -- Complete autosuggestion
-# ctrl+t -- Fuzzy file selection 
-# ctrl+i / Tab -- Open fuzzy completion.
+# ctrl+f / ctrl+t -- Fuzzy file selection 
+# tab / ctrl+i -- Open fuzzy completion.
 # ctrl+o / ctrl+j / ctrl+m / Enter -- Run command.
-# ctrl+a -- Go to start of prompt.
-# ctrl+e -- Go to end of prompt.
+# ctrl+e -- Edit command line in editor.
 # ctrl+h -- Delete last character.
+# ctrl+c -- Kill process.
 # ctrl+b -- Back char.
 # ctrl+w -- Delete last word.
 # ctrl+u -- Delete whole prompt.
-# ctrl+k -- Elimina desde el cursor actual hasta el final del command.
+# ctrl+k -- Detele from cursor to end.
 # ctrl+d -- Close terminal.
 # ctrl+g -- Send break.
 # ctrl+l -- Clears terminal.
@@ -87,9 +174,11 @@ bindkey '^k' kill-line
 # ctrl+shift+v -- Paste from clipboard to terminal. 
 # Esc -- Sets command line vim-mode to normal.
 # Esc+Esc -- Add sudo to command prompt.
+# H (normal mode) -- Go to start of line
+# L (normal mode) -- Go to end of line
 
 # SHELL OPTIONS ==============================================================
-setopt NO_BEEP # No bell: Shut up Zsh
+setopt NO_BEEP # No bell: Hush zsh
 
 # Command line history.
 HISTSIZE=50000
@@ -103,6 +192,8 @@ setopt hist_ignore_all_dups
 setopt hist_save_no_dups
 setopt hist_ignore_dups
 setopt hist_find_no_dups
+setopt pushd_ignore_dups  # no duplicate entries
+setopt pushd_silent       # no stack output on every cd
 
 # Completion styling
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}' # Ignore case in autocompletion.
@@ -133,6 +224,7 @@ alias _="cd ~/_"
 alias today="fd --changed-within=1d -tf '.*' ~"
 # alias tmux='tmux -S ~/.tmux-socket'
 alias claude="titled 'Claude Code' claude"
+alias '??'="claude -p"
 unalias ls 2>/dev/null
 
 # ENV VARIABLES ==============================================================
@@ -141,14 +233,29 @@ export EDITOR=nvim
 export VISUAL=nvim
 
 # FUNCTIONS ==============================================================
-titled() {
+function cd() {
+  if [[ "$1" == (-|..|../*|./*|/*|~/*|~) ]]; then
+    builtin pushd "$@" > /dev/null
+  else
+    builtin pushd -q . > /dev/null && __zoxide_z "$@"
+  fi
+}
+
+function dirdiff() {
+  nvim -c "DirDiff $1 $2"
+}
+function filediff() {
+  nvim -d $1 $2
+}
+
+function titled() {
   local title="$1"; shift
   print -Pn "\e]0;${title}\a"
   "$@"
   print -Pn "\e]0;%~\a"
 }
 
-ls() {
+function ls() {
     # 1. Check if the user wants to show all files
     # The regex now detects 'a' or 'A' even in combined flags like -la or -rtah
     local show_all=0
@@ -205,6 +312,9 @@ vimode-replace() {
   export VI_MODE="R"
   redraw-prompt
 }
+
+# This must be before _omp_create_widget 
+zmodload zsh/zle
 
 # CMD/Normal mode
 _omp_create_widget vi-cmd-mode vimode-cmd
