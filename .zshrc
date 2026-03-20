@@ -54,6 +54,8 @@ export RUSTUP_HOME="$HOME/.rustup"
 export PATH="$CARGO_HOME/bin:$PATH"
 
 export PATH=$PATH:~/bin:~/.local/bin
+export PATH=$PATH:/usr/local/cuda/bin
+
 typeset -U PATH # Force no duplicates in path.
 
 # KEYBINDINGS ================================================================
@@ -231,6 +233,11 @@ unalias ls 2>/dev/null
 # Set default editor
 export EDITOR=nvim
 export VISUAL=nvim
+export GITHUB_PERSONAL_ACCESS_TOKEN="$(gh auth token)" 
+# Change color for other-writable (mounted windows filesystems) to avoid
+# inverte green block that was unreadable.
+export LS_COLORS="$LS_COLORS:ow=01;33"
+
 
 # FUNCTIONS ==============================================================
 function cd() {
@@ -257,7 +264,6 @@ function titled() {
 
 function ls() {
     # 1. Check if the user wants to show all files
-    # The regex now detects 'a' or 'A' even in combined flags like -la or -rtah
     local show_all=0
     for arg in "$@"; do
         if [[ "$arg" =~ ^-[^-]*[aA] || "$arg" == "--all" || "$arg" == "--almost-all" ]]; then
@@ -266,18 +272,24 @@ function ls() {
         fi
     done
 
-    # 2. If not showing all and a local .hidden file exists
-    if [[ "$show_all" -eq 0 ]] && [[ -f ".hidden" ]]; then
+    # 2. Find the target directory from positional args (last non-flag argument)
+    local target_dir="."
+    for arg in "$@"; do
+        [[ "$arg" == --* ]] && continue   # skip --long-flags
+        [[ "$arg" == -* ]] && continue    # skip -short-flags
+        target_dir="$arg"                 # last positional arg wins
+    done
+
+    # 3. If not showing all and a .hidden file exists in the target directory
+    if [[ "$show_all" -eq 0 ]] && [[ -f "${target_dir}/.hidden" ]]; then
         local ignore_args=()
-        # Read .hidden file in an efficient way. 
-        for line in ${(f)"$(< .hidden)"}; do
+        for line in ${(f)"$(< "${target_dir}/.hidden")"}; do
             [[ -z "${line// }" || "$line" =~ ^# ]] && continue
-            ignore_args+=("--ignore-glob" "${line#"${line%%[![:space:]]*}"}") # Trim left
+            ignore_args+=("--ignore-glob" "${line#"${line%%[![:space:]]*}"}")
         done
-        
+
         command lsd "${ignore_args[@]}" "$@"
     else
-        # 3. Standard behavior if no .hidden file is found or -a is used
         command lsd "$@"
     fi
 }
